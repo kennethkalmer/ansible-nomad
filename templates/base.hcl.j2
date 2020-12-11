@@ -48,7 +48,7 @@ leave_on_interrupt = {{ nomad_leave_on_interrupt | bool | lower }}
 {% if nomad_tls_enable | bool %}
 tls {
     http = true
-    rpc = true
+    rpc = "{{ nomad_tls_rpc | default("false") | bool | lower }}"
     ca_file = "{{ nomad_ca_file }}"
     cert_file = "{{ nomad_cert_file }}"
     key_file = "{{ nomad_key_file }}"
@@ -58,6 +58,7 @@ tls {
 }
 {% endif %}
 
+
 acl {
     enabled = {{ nomad_acl_enabled | bool | lower }}
     token_ttl = "{{ nomad_acl_token_ttl }}"
@@ -65,8 +66,10 @@ acl {
     replication_token = "{{ nomad_acl_replication_token }}"
 }
 
+
+{% if nomad_vault_enabled | default(False) | bool == True %}
 vault {
-    enabled = {{ nomad_vault_enabled | bool | lower }}
+    enabled = true}
     address = "{{ nomad_vault_address }}"
     allow_unauthenticated = {{ nomad_vault_allow_unauthenticated | bool | lower }}
     create_from_role = "{{ nomad_vault_create_from_role }}"
@@ -82,6 +85,8 @@ vault {
 {% endif %}
     namespace = "{{ nomad_vault_namespace }}"
 }
+{% endif %}
+
 
 {% if nomad_telemetry | default(False) | bool == True %}
 telemetry {
@@ -97,11 +102,20 @@ telemetry {
     filter_default = "{{ nomad_telemetry_filter_default | default("true") }}"
     prefix_filter = {{ nomad_telemetry_prefix_filter | default([]) }}
     disable_dispatched_job_summary_metrics = "{{ nomad_telemetry_disable_dispatched_job_summary_metrics | default(false) | bool | lower }}"
+
+    prometheus_metrics = "{{ nomad_telemetry_prometheus_metrics | default(false) | bool | lower }}"
+
+{% if nomad_telemetry_statsite_address | default(False) | bool == True %}
     statsite_address = "{{ nomad_telemetry_statsite_address | default("") }}"
+{% endif %}
+{% if nomad_telemetry_statsd_address | default(False) | bool == True %}
     statsd_address = "{{ nomad_telemetry_statsd_address | default("") }}"
+{% endif %}
+{% if nomad_telemetry_datadog_address | default(False) | bool == True %}
     datadog_address = "{{ nomad_telemetry_datadog_address | default("") }}"
     datadog_tags = {{ nomad_telemetry_datadog_tags | default([]) }}
-    prometheus_metrics = "{{ nomad_telemetry_prometheus_metrics | default(false) | bool | lower }}"
+{% endif %}
+{% if nomad_telemetry_circonus_api_token | default(False) | bool == True %}
     circonus_api_token = "{{ nomad_telemetry_circonus_api_token | default("") }}"
     circonus_api_app = "{{ nomad_telemetry_circonus_api_app | default("nomad") }}"
     circonus_api_url = "{{ nomad_telemetry_circonus_api_url | default("https://api.circonus.com/v2") }}"
@@ -115,6 +129,7 @@ telemetry {
     circonus_check_tags = "{{ circonus_check_tags | default("") }}"
     circonus_broker_id = "{{ circonus_broker_id | default("") }}"
     circonus_broker_select_tag = "{{ circonus_broker_select_tag | default("") }}"
+{% endif %}
 }
 {% endif %}
 

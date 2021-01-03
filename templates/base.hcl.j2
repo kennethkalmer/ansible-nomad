@@ -69,7 +69,7 @@ acl {
 
 {% if nomad_vault_enabled | default(False) | bool == True %}
 vault {
-    enabled = true}
+    enabled = true
     address = "{{ nomad_vault_address }}"
     allow_unauthenticated = {{ nomad_vault_allow_unauthenticated | bool | lower }}
     create_from_role = "{{ nomad_vault_create_from_role }}"

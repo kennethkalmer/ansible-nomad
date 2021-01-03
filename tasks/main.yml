@@ -82,6 +82,25 @@
   notify:
     - restart nomad
 
+- name: Calculate nomad_cpu_total_compute for amd64
+  shell: |
+    set -euo pipefail
+    cpu_freq=$(dmidecode -t 4 | grep 'Current Speed' | sed 's/.*: //' | sed 's/ .*//' | awk '{s+=$1} END {print s}')
+    cpu_count=$(dmidecode -t 4 | grep 'Core Enabled' | sed 's/.*: //' | sed 's/ .*//' | awk '{s+=$1} END {print s}')
+    echo $(( $cpu_count * $cpu_freq ))
+  args:
+    executable: /bin/bash
+  register: cpu_total_compute
+  when:
+    - nomad_architecture in ['arm', 'arm64']
+
+- name: Set nomad_cpu_total_compute from calculated value
+  set_fact:
+    nomad_cpu_total_compute: "{{ cpu_total_compute.stdout }}"
+  when:
+    - cpu_total_compute is defined
+    - nomad_architecture in ['arm', 'arm64']
+
 - name: Client configuration
   template:
     src: client.hcl.j2

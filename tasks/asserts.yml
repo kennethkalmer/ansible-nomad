@@ -38,4 +38,6 @@
 - name: Check nomad_group_name is included in groups
   fail:
     msg: "nomad_group_name must be included in groups."
-  when: nomad_group_name not in groups
+  when:
+    - not nomad_manage_group | bool
+    - nomad_group_name not in groups
